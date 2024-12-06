@@ -3,11 +3,12 @@ name: Build and Push Docker Images (Parallel Execution)
 on:
   push:
     branches:
-      - main  # Trigger the workflow only on push to main branch (or adjust as needed)
+      - main  # Trigger the workflow only on push to the main branch (or adjust as needed)
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Or specify ubuntu-22.04 if you want to avoid the upcoming changes
+
     strategy:
       matrix:
         service: [web, api]  # Define the services to build and push in parallel
@@ -32,6 +33,6 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v4
         with:
-          context: ./{{ matrix.service }}  # Dynamically set the build context (web or api)
+          context: ./${{ matrix.service }}  # Dynamically set the build context (web or api)
           push: true  # Push the image to the registry
-          tags: ${{ secrets.DOCKER_USERNAME }}/buzbud-{{ matrix.service }}:latest  # Docker tag with service name
+          tags: ${{ secrets.DOCKER_USERNAME }}/buzbud-${{ matrix.service }}:latest  # Corrected Docker tag format
