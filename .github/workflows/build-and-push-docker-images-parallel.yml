@@ -1,34 +1,37 @@
 name: Build and Push Docker Images (Parallel Execution)
 
 on:
-  push:  # This triggers the workflow on any push event
-    
+  push:
+    branches:
+      - main  # Trigger the workflow only on push to main branch (or adjust as needed)
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [web, api]  # Define the services to build and push
+        service: [web, api]  # Define the services to build and push in parallel
+
     steps:
-    # Step 1: Check out the repository
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # Step 1: Check out the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    # Step 2: Log in to Docker Hub
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      # Step 2: Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    # Step 3: Set up Docker Buildx
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      # Step 3: Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-    # Step 4: Build and Push Docker Image
-    - name: Build and Push Docker Image
-      uses: docker/build-push-action@v4
-      with:
-        context: ./{{ matrix.service }}  # Dynamically set the context for web or api
-        push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/buzbud-{{ matrix.service }}:latest
+      # Step 4: Build and Push Docker Image
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./{{ matrix.service }}  # Dynamically set the build context (web or api)
+          push: true  # Push the image to the registry
+          tags: ${{ secrets.DOCKER_USERNAME }}/buzbud-{{ matrix.service }}:latest  # Docker tag with service name
